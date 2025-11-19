@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Jellyfin.Plugin.DiscontinueWatching</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <CodeAnalysisRuleSet>../jellyfin.ruleset</CodeAnalysisRuleSet>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PublishDeps>true</PublishDeps>
+
+    <!-- Version Information -->
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PluginVersion>1.0.0.0</PluginVersion>
+
+    <!-- Package Information -->
+    <PackageId>Jellyfin.Plugin.DiscontinueWatching</PackageId>
+    <Title>DiscontinueWatching</Title>
+    <Authors>jon4hz</Authors>
+    <Description>A Jellyfin plugin for DiscontinueWatching</Description>
+    <PackageLicenseExpression>GPL-3.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/jon4hz/jellyfin-plugin-discontinue-watching</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="10.11.0" />
+    <PackageReference Include="Jellyfin.Model" Version="10.11.0" />
+    <PackageReference Include="Humanizer.Core" Version="2.14.1" PrivateAssets="none" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Configuration\configPage.html" />
+    <EmbeddedResource Include="Configuration\configPage.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Web\discontinue-watching.js" />
+    <EmbeddedResource Include="Web\discontinue-watching.js" />
+  </ItemGroup>
+
+  <!-- Create plugin package -->
+  <Target Name="CreatePluginPackage" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <PluginDir>$(MSBuildProjectDirectory)/../bin/plugin</PluginDir>
+      <PluginArchive>$(MSBuildProjectDirectory)/../bin/jellyfin-plugin-discontinue-watching-$(PluginVersion).zip</PluginArchive>
+    </PropertyGroup>
+
+    <!-- Include only specific DLLs we want in the plugin package -->
+    <ItemGroup>
+      <!-- Always include the main plugin DLL -->
+      <PluginFiles Include="$(PublishDir)$(AssemblyName).dll" />
+      <!-- Include specific third-party dependencies -->
+      <PluginFiles Include="$(PublishDir)Humanizer.dll" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(PluginDir)" />
+    <MakeDir Directories="$(PluginDir)" />
+
+    <Copy SourceFiles="@(PluginFiles)" DestinationFolder="$(PluginDir)" />
+
+    <!-- Log what files are being included -->
+    <Message Text="Plugin package contents:" Importance="high" />
+    <Message Text="  - %(PluginFiles.Filename)%(PluginFiles.Extension)" Importance="high" />
+
+    <!-- Use cross-platform zip command or fallback -->
+    <Exec Command="which zip > /dev/null 2>&amp;1 &amp;&amp; cd &quot;$(PluginDir)&quot; &amp;&amp; zip -r &quot;$(PluginArchive)&quot; . || echo 'zip command not available, package created in $(PluginDir)'"
+          ContinueOnError="true" />
+
+    <Message Text="Plugin files prepared in: $(PluginDir)" Importance="high" />
+    <Message Text="Plugin package: $(PluginArchive)" Importance="high" Condition="Exists('$(PluginArchive)')" />
+  </Target>
+
+</Project>

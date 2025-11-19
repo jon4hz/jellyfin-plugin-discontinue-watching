@@ -1,0 +1,12 @@
+[
+  {
+    "guid": "74a22212-e4c5-4b5c-8d77-04e7e220f28d",
+    "name": "DiscontinueWatching",
+    "overview": "Hide items from the Continue Watching list",
+    "description": "DiscontinueWatching hides items from the Continue Watching list in Jellyfin, helping you keep your watchlist clean and relevant.",
+    "owner": "jon4hz",
+    "category": "General",
+    "imageUrl": "https://media.githubusercontent.com/media/jon4hz/jellyfin-plugin-discontinue-watching/main/assets/discontinue-watching.png",
+    "versions": []
+  }
+]

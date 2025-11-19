@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DiscontinueWatching Configuration</title>
+  </head>
+  <body>
+    <div id="DiscontinueWatchingConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+      <div data-role="content">
+        <div class="content-primary">
+          <h2>DiscontinueWatching Plugin</h2>
+          <p>
+            This plugin allows users to hide items from their "Continue Watching" list. Hidden items will automatically
+            reappear when playback is resumed.
+          </p>
+
+          <h3>Features</h3>
+          <ul>
+            <li>Hide items from Continue Watching via API</li>
+            <li>User-specific denylist management</li>
+            <li>Automatic removal from denylist when playback resumes</li>
+          </ul>
+
+          <h3>API Endpoints</h3>
+          <p>The following authenticated API endpoints are available:</p>
+          <ul>
+            <li><strong>GET</strong> /DiscontinueWatching - Get all denylisted items</li>
+            <li><strong>POST</strong> /DiscontinueWatching/{itemId} - Add item to denylist</li>
+            <li><strong>DELETE</strong> /DiscontinueWatching/{itemId} - Remove item from denylist</li>
+          </ul>
+
+          <h3>Usage</h3>
+          <p>
+            Use the API endpoints from your Jellyfin client or custom scripts to manage which items are hidden from
+            Continue Watching. Items will be automatically restored when you start playing them again.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
