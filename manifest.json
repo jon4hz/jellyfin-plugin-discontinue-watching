@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "0.1.1.0",
+        "changelog": "- See the full changelog at [GitHub](https://github.com/jon4hz/jellyfin-plugin-discontinue-watching/releases/tag/v0.1.1)\n",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/jon4hz/jellyfin-plugin-discontinue-watching/releases/download/v0.1.1/jellyfin-plugin-discontinue-watching-0.1.1.zip",
+        "checksum": "3034eff674f3a10c109a576249d10dce",
+        "timestamp": "2025-11-20T21:32:53Z"
+      },
+      {
         "version": "0.1.0.0",
         "changelog": "- See the full changelog at [GitHub](https://github.com/jon4hz/jellyfin-plugin-discontinue-watching/releases/tag/v0.1.0)\n",
         "targetAbi": "10.11.0.0",
