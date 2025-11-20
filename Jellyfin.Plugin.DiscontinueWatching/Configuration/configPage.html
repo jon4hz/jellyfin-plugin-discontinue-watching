@@ -17,7 +17,9 @@
             </p>
 
             <div class="inputContainer">
-              <label class="inputLabel inputLabelUnfocused" for="daysThreshold">Days Threshold:</label>
+              <label class="inputLabel inputLabelUnfocused" for="daysThreshold">
+                <span>Days Threshold</span>
+              </label>
               <input
                 is="emby-input"
                 type="number"
@@ -38,6 +40,11 @@
               <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                 <span>Save</span>
               </button>
+            </div>
+
+            <h3>User Denylists</h3>
+            <div id="userDenylistsContainer">
+              <p>Loading user denylists...</p>
             </div>
 
             <h3>Features</h3>
@@ -74,33 +81,165 @@
     </div>
 
     <script type="text/javascript">
-      var DiscontinueWatchingConfigPage = {
-        pluginUniqueId: '74a22212-e4c5-4b5c-8d77-04e7e220f28d',
+      var DiscontinueWatchingConfig = {
+        pluginId: '74a22212-e4c5-4b5c-8d77-04e7e220f28d',
+
+        loadConfiguration: function () {
+          Dashboard.showLoadingMsg();
+          ApiClient.getPluginConfiguration(DiscontinueWatchingConfig.pluginId)
+            .then(function (config) {
+              document.getElementById('daysThreshold').value = config.DaysThreshold || 180;
+              Dashboard.hideLoadingMsg();
+            })
+            .catch(function () {
+              Dashboard.hideLoadingMsg();
+            });
+        },
+
+        loadUserDenylists: function () {
+          var container = document.getElementById('userDenylistsContainer');
+          container.innerHTML = '<p>Loading user denylists...</p>';
+
+          console.log('[DiscontinueWatching] Loading user denylists...');
+
+          ApiClient.getPluginConfiguration(DiscontinueWatchingConfig.pluginId)
+            .then(function (config) {
+              console.log('[DiscontinueWatching] Configuration:', config);
+
+              if (!config.UserDenylistEntries || config.UserDenylistEntries.length === 0) {
+                container.innerHTML = '<p>No denylisted items found.</p>';
+                return;
+              }
+
+              var html = '<div class="userDenylists">';
+              config.UserDenylistEntries.forEach(function (entry) {
+                html += '<div class="userDenylistSection" style="margin-bottom: 20px;">';
+                html += '<h4>User ID: ' + entry.UserId + '</h4>';
+
+                if (!entry.ItemIds || entry.ItemIds.length === 0) {
+                  html += '<p style="margin-left: 20px;">No denylisted items.</p>';
+                } else {
+                  html += '<ul style="list-style-type: none; padding-left: 20px;">';
+                  entry.ItemIds.forEach(function (itemId) {
+                    html += '<li style="margin: 5px 0; display: flex; align-items: center; gap: 10px;">';
+                    html += '<span style="font-family: monospace;">' + itemId + '</span>';
+                    html +=
+                      '<button is="emby-button" class="raised button-cancel emby-button remove-denylist-item" ' +
+                      'data-user-id="' +
+                      entry.UserId +
+                      '" data-item-id="' +
+                      itemId +
+                      '">';
+                    html += '<span>Remove</span>';
+                    html += '</button>';
+                    html += '</li>';
+                  });
+                  html += '</ul>';
+                }
+
+                html += '</div>';
+              });
+              html += '</div>';
+
+              container.innerHTML = html;
+
+              // Re-attach event listeners to the new buttons
+              container.querySelectorAll('.remove-denylist-item').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                  var userId = this.getAttribute('data-user-id');
+                  var itemId = this.getAttribute('data-item-id');
+                  DiscontinueWatchingConfig.removeItemFromUserDenylist(userId, itemId);
+                });
+              });
+            })
+            .catch(function (error) {
+              console.error('[DiscontinueWatching] Error loading user denylists:', error);
+              container.innerHTML =
+                '<p style="color: red;">Error loading user denylists: ' + (error.message || error) + '</p>';
+            });
+        },
+
+        removeItemFromUserDenylist: function (userId, itemId) {
+          if (!confirm('Are you sure you want to remove this item from the denylist?')) {
+            return;
+          }
+
+          Dashboard.showLoadingMsg();
+
+          ApiClient.getPluginConfiguration(DiscontinueWatchingConfig.pluginId).then(function (config) {
+            // Find the user's denylist entry
+            var entry = config.UserDenylistEntries.find(function (e) {
+              return e.UserId === userId;
+            });
+
+            if (entry) {
+              // Remove the item from the array
+              var index = entry.ItemIds.indexOf(itemId);
+              if (index > -1) {
+                entry.ItemIds.splice(index, 1);
+              }
+
+              // If the user has no more items, remove the entry completely
+              if (entry.ItemIds.length === 0) {
+                var entryIndex = config.UserDenylistEntries.indexOf(entry);
+                if (entryIndex > -1) {
+                  config.UserDenylistEntries.splice(entryIndex, 1);
+                }
+              }
+
+              // Save the updated configuration
+              ApiClient.updatePluginConfiguration(DiscontinueWatchingConfig.pluginId, config)
+                .then(function () {
+                  Dashboard.hideLoadingMsg();
+                  require(['toast'], function (toast) {
+                    toast('Item removed from denylist');
+                  });
+                  DiscontinueWatchingConfig.loadUserDenylists();
+                })
+                .catch(function (error) {
+                  Dashboard.hideLoadingMsg();
+                  console.error('[DiscontinueWatching] Error saving configuration:', error);
+                  require(['toast'], function (toast) {
+                    toast('Error removing item from denylist');
+                  });
+                });
+            } else {
+              Dashboard.hideLoadingMsg();
+              require(['toast'], function (toast) {
+                toast('User denylist entry not found');
+              });
+            }
+          });
+        },
+
+        saveConfiguration: function () {
+          Dashboard.showLoadingMsg();
+
+          ApiClient.getPluginConfiguration(DiscontinueWatchingConfig.pluginId).then(function (config) {
+            config.DaysThreshold = parseInt(document.getElementById('daysThreshold').value, 10);
+
+            ApiClient.updatePluginConfiguration(DiscontinueWatchingConfig.pluginId, config).then(function (result) {
+              Dashboard.processPluginConfigurationUpdateResult(result);
+            });
+          });
+        },
+
+        registerEvents: function () {
+          document.querySelector('#DiscontinueWatchingConfigForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            DiscontinueWatchingConfig.saveConfiguration();
+            return false;
+          });
+        },
       };
 
-      document.getElementById('DiscontinueWatchingConfigPage').addEventListener('pageshow', function () {
-        Dashboard.showLoadingMsg();
-        ApiClient.getPluginConfiguration(DiscontinueWatchingConfigPage.pluginUniqueId).then(function (config) {
-          document.getElementById('daysThreshold').value = config.DaysThreshold || 180;
-          Dashboard.hideLoadingMsg();
-        });
-      });
-
-      document.getElementById('DiscontinueWatchingConfigForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        Dashboard.showLoadingMsg();
-
-        ApiClient.getPluginConfiguration(DiscontinueWatchingConfigPage.pluginUniqueId).then(function (config) {
-          config.DaysThreshold = parseInt(document.getElementById('daysThreshold').value, 10);
-
-          ApiClient.updatePluginConfiguration(DiscontinueWatchingConfigPage.pluginUniqueId, config).then(function (
-            result
-          ) {
-            Dashboard.processPluginConfigurationUpdateResult(result);
-          });
-        });
-
-        return false;
+      document.addEventListener('pageshow', function (e) {
+        if (e.target.id === 'DiscontinueWatchingConfigPage') {
+          console.log('[DiscontinueWatching] Config page pageshow event fired');
+          DiscontinueWatchingConfig.loadConfiguration();
+          DiscontinueWatchingConfig.loadUserDenylists();
+          DiscontinueWatchingConfig.registerEvents();
+        }
       });
     </script>
   </body>
