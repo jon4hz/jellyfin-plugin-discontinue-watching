@@ -135,7 +135,7 @@
     cards.forEach(card => {
       const itemId = card.getAttribute('data-id');
       if (itemId && denylist.has(itemId)) {
-        card.style.display = 'none';
+        card.remove();
       }
     });
   }
@@ -206,8 +206,8 @@
         await callPluginAPI('addToDenylist', { itemId });
         denylist.add(itemId);
 
-        // Hide the card instead of removing it to preserve DOM structure
-        card.style.display = 'none';
+        // Remove the card from the DOM
+        card.remove();
 
         console.log(`[DiscontinueWatching] Successfully removed item ${itemId} from continue watching`);
       } catch (error) {
