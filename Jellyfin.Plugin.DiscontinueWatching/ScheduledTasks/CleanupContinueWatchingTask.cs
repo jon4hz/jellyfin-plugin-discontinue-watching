@@ -1,4 +1,5 @@
 using Jellyfin.Data.Enums;
+using Jellyfin.Database.Implementations.Enums;
 using Jellyfin.Plugin.DiscontinueWatching.Services;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -125,19 +126,23 @@ public class CleanupContinueWatchingTask : IScheduledTask
                 return Task.FromResult(0);
             }
 
+            // mimics what jellyfin does in GetTvResume and GetMovieResume
             var query = new InternalItemsQuery
             {
                 User = user,
-                IsPlayed = false,
+                IsResumable = true,
                 Recursive = true,
+                OrderBy = new[] { (ItemSortBy.DatePlayed, SortOrder.Descending), (ItemSortBy.SortName, SortOrder.Descending) },
                 IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Episode },
-                Limit = 100
+                Limit = 50  // GetSpecialItemsLimit
             };
 
             var inProgressItems = _libraryManager.GetItemList(query);
+            _logger.LogDebug("Found {Count} in-progress items for user {UserId}", inProgressItems.Count, userId);
 
             foreach (var item in inProgressItems)
             {
+                _logger.LogDebug("Checking item {ItemId} for user {UserId}", item.Id, userId);
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
@@ -148,6 +153,12 @@ public class CleanupContinueWatchingTask : IScheduledTask
                 // Check if item has been played and has a last played date
                 if (userData != null && userData.PlaybackPositionTicks > 0 && userData.LastPlayedDate.HasValue)
                 {
+                    _logger.LogDebug(
+                        "Item {ItemId} last played on {LastPlayed} for user {UserId}",
+                        item.Id,
+                        userData.LastPlayedDate.Value,
+                        userId);
+
                     // Check if last played date is older than threshold
                     if (userData.LastPlayedDate.Value < thresholdDate)
                     {
