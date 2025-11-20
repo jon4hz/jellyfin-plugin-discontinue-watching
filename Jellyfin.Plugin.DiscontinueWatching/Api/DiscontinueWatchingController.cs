@@ -40,11 +40,11 @@ public class DiscontinueWatchingController : ControllerBase
     /// </summary>
     /// <param name="itemId">The item ID to add to the denylist.</param>
     /// <returns>No content on success.</returns>
-    /// <response code="204">Item successfully added to denylist.</response>
+    /// <response code="200">Item successfully added to denylist.</response>
     /// <response code="400">Invalid item ID.</response>
     /// <response code="401">Unauthorized.</response>
     [HttpPost("{itemId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult AddItemToDenylist([FromRoute, Required] string itemId)
@@ -58,7 +58,7 @@ public class DiscontinueWatchingController : ControllerBase
 
         _logger.LogDebug("Adding item {ItemId} to denylist for user {UserId}", itemId, userId);
         _denylistManager.AddToUserDenylist(userId, itemId);
-        return NoContent();
+        return Ok();
     }
 
     /// <summary>
@@ -89,11 +89,11 @@ public class DiscontinueWatchingController : ControllerBase
     /// </summary>
     /// <param name="itemId">The item ID to remove from the denylist.</param>
     /// <returns>No content on success.</returns>
-    /// <response code="204">Item successfully removed from denylist.</response>
+    /// <response code="200">Item successfully removed from denylist.</response>
     /// <response code="400">Invalid item ID.</response>
     /// <response code="401">Unauthorized.</response>
     [HttpDelete("{itemId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult RemoveItemFromDenylist([FromRoute, Required] string itemId)
@@ -107,7 +107,7 @@ public class DiscontinueWatchingController : ControllerBase
 
         _logger.LogDebug("Removing item {ItemId} from denylist for user {UserId}", itemId, userId);
         _denylistManager.RemoveFromUserDenylist(userId, itemId);
-        return NoContent();
+        return Ok();
     }
 
     /// <summary>
