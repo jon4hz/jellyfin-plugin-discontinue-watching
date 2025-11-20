@@ -206,8 +206,8 @@
         await callPluginAPI('addToDenylist', { itemId });
         denylist.add(itemId);
 
-        // Remove the card from the DOM
-        card.remove();
+        // Hide the card instead of removing it to preserve DOM structure
+        card.style.display = 'none';
 
         console.log(`[DiscontinueWatching] Successfully removed item ${itemId} from continue watching`);
       } catch (error) {
