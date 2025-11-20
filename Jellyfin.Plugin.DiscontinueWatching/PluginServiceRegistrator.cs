@@ -19,5 +19,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     {
         serviceCollection.AddSingleton<DenylistManager>();
         serviceCollection.AddScoped<IEventConsumer<PlaybackStartEventArgs>, PlaybackStartConsumer>();
+        serviceCollection.AddHostedService<PluginEntryPoint>();
     }
 }
