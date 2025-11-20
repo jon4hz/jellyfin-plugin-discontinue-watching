@@ -9,34 +9,99 @@
     <div id="DiscontinueWatchingConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
       <div data-role="content">
         <div class="content-primary">
-          <h2>DiscontinueWatching Plugin</h2>
-          <p>
-            This plugin allows users to hide items from their "Continue Watching" list. Hidden items will automatically
-            reappear when playback is resumed.
-          </p>
+          <form id="DiscontinueWatchingConfigForm">
+            <h2>DiscontinueWatching Plugin</h2>
+            <p>
+              This plugin allows users to hide items from their "Continue Watching" list. Hidden items will
+              automatically reappear when playback is resumed.
+            </p>
 
-          <h3>Features</h3>
-          <ul>
-            <li>Hide items from Continue Watching via API</li>
-            <li>User-specific denylist management</li>
-            <li>Automatic removal from denylist when playback resumes</li>
-          </ul>
+            <div class="inputContainer">
+              <label class="inputLabel inputLabelUnfocused" for="daysThreshold">Days Threshold:</label>
+              <input
+                is="emby-input"
+                type="number"
+                id="daysThreshold"
+                name="daysThreshold"
+                min="1"
+                max="365"
+                step="1"
+                class="emby-input"
+              />
+              <div class="fieldDescription">
+                Items that haven't been watched for this many days will be automatically removed from Continue Watching
+                by the scheduled task. (Default: 180 days)
+              </div>
+            </div>
 
-          <h3>API Endpoints</h3>
-          <p>The following authenticated API endpoints are available:</p>
-          <ul>
-            <li><strong>GET</strong> /DiscontinueWatching - Get all denylisted items</li>
-            <li><strong>POST</strong> /DiscontinueWatching/{itemId} - Add item to denylist</li>
-            <li><strong>DELETE</strong> /DiscontinueWatching/{itemId} - Remove item from denylist</li>
-          </ul>
+            <div>
+              <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                <span>Save</span>
+              </button>
+            </div>
 
-          <h3>Usage</h3>
-          <p>
-            Use the API endpoints from your Jellyfin client or custom scripts to manage which items are hidden from
-            Continue Watching. Items will be automatically restored when you start playing them again.
-          </p>
+            <h3>Features</h3>
+            <ul>
+              <li>Hide items from Continue Watching via API</li>
+              <li>User-specific denylist management</li>
+              <li>Automatic removal from denylist when playback resumes</li>
+              <li>Scheduled cleanup of old Continue Watching items</li>
+            </ul>
+
+            <h3>Scheduled Task</h3>
+            <p>
+              A scheduled task runs daily to automatically hide items from Continue Watching that haven't been watched
+              within the configured threshold. You can manually trigger this task from the Jellyfin dashboard under
+              Scheduled Tasks.
+            </p>
+
+            <h3>API Endpoints</h3>
+            <p>The following authenticated API endpoints are available:</p>
+            <ul>
+              <li><strong>GET</strong> /DiscontinueWatching - Get all denylisted items</li>
+              <li><strong>POST</strong> /DiscontinueWatching/{itemId} - Add item to denylist</li>
+              <li><strong>DELETE</strong> /DiscontinueWatching/{itemId} - Remove item from denylist</li>
+            </ul>
+
+            <h3>Usage</h3>
+            <p>
+              Use the API endpoints from your Jellyfin client or custom scripts to manage which items are hidden from
+              Continue Watching. Items will be automatically restored when you start playing them again.
+            </p>
+          </form>
         </div>
       </div>
     </div>
+
+    <script type="text/javascript">
+      var DiscontinueWatchingConfigPage = {
+        pluginUniqueId: '74a22212-e4c5-4b5c-8d77-04e7e220f28d',
+      };
+
+      document.getElementById('DiscontinueWatchingConfigPage').addEventListener('pageshow', function () {
+        Dashboard.showLoadingMsg();
+        ApiClient.getPluginConfiguration(DiscontinueWatchingConfigPage.pluginUniqueId).then(function (config) {
+          document.getElementById('daysThreshold').value = config.DaysThreshold || 180;
+          Dashboard.hideLoadingMsg();
+        });
+      });
+
+      document.getElementById('DiscontinueWatchingConfigForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        Dashboard.showLoadingMsg();
+
+        ApiClient.getPluginConfiguration(DiscontinueWatchingConfigPage.pluginUniqueId).then(function (config) {
+          config.DaysThreshold = parseInt(document.getElementById('daysThreshold').value, 10);
+
+          ApiClient.updatePluginConfiguration(DiscontinueWatchingConfigPage.pluginUniqueId, config).then(function (
+            result
+          ) {
+            Dashboard.processPluginConfigurationUpdateResult(result);
+          });
+        });
+
+        return false;
+      });
+    </script>
   </body>
 </html>
