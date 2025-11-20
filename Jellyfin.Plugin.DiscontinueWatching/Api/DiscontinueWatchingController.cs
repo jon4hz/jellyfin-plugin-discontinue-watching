@@ -21,22 +21,18 @@ public class DiscontinueWatchingController : ControllerBase
 {
     private readonly ILogger<DiscontinueWatchingController> _logger;
     private readonly DenylistManager _denylistManager;
-    private readonly ISessionManager _sessionManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DiscontinueWatchingController"/> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
     /// <param name="denylistManager">The denylist manager.</param>
-    /// <param name="sessionManager">The session manager.</param>
     public DiscontinueWatchingController(
         ILogger<DiscontinueWatchingController> logger,
-        DenylistManager denylistManager,
-        ISessionManager sessionManager)
+        DenylistManager denylistManager)
     {
         _logger = logger;
         _denylistManager = denylistManager;
-        _sessionManager = sessionManager;
     }
 
     /// <summary>
@@ -51,7 +47,7 @@ public class DiscontinueWatchingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult AddItemToDenylist([FromRoute, Required] Guid itemId)
+    public ActionResult AddItemToDenylist([FromRoute, Required] string itemId)
     {
         var userId = GetUserId();
         if (userId == Guid.Empty)
@@ -100,7 +96,7 @@ public class DiscontinueWatchingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult RemoveItemFromDenylist([FromRoute, Required] Guid itemId)
+    public ActionResult RemoveItemFromDenylist([FromRoute, Required] string itemId)
     {
         var userId = GetUserId();
         if (userId == Guid.Empty)

@@ -26,7 +26,7 @@ public class DenylistManager
     /// </summary>
     /// <param name="userId">The user ID.</param>
     /// <param name="itemId">The item ID to add to the denylist.</param>
-    public void AddToUserDenylist(Guid userId, Guid itemId)
+    public void AddToUserDenylist(Guid userId, string itemId)
     {
         var config = DiscontinueWatchingPlugin.Instance?.Configuration;
         if (config == null)
@@ -35,14 +35,16 @@ public class DenylistManager
             return;
         }
 
-        if (!config.UserDenylists.TryGetValue(userId, out var denylist))
+        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
+        if (entry == null)
         {
-            denylist = new HashSet<Guid>();
-            config.UserDenylists[userId] = denylist;
+            entry = new Configuration.UserDenylistEntry { UserId = userId };
+            config.UserDenylistEntries.Add(entry);
         }
 
-        if (denylist.Add(itemId))
+        if (!entry.ItemIds.Contains(itemId))
         {
+            entry.ItemIds.Add(itemId);
             DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
             _logger.LogInformation("Added item {ItemId} to denylist for user {UserId}", itemId, userId);
         }
@@ -57,7 +59,7 @@ public class DenylistManager
     /// </summary>
     /// <param name="userId">The user ID.</param>
     /// <param name="itemId">The item ID to remove from the denylist.</param>
-    public void RemoveFromUserDenylist(Guid userId, Guid itemId)
+    public void RemoveFromUserDenylist(Guid userId, string itemId)
     {
         var config = DiscontinueWatchingPlugin.Instance?.Configuration;
         if (config == null)
@@ -66,17 +68,15 @@ public class DenylistManager
             return;
         }
 
-        if (config.UserDenylists.TryGetValue(userId, out var denylist))
+        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
+        if (entry != null && entry.ItemIds.Remove(itemId))
         {
-            if (denylist.Remove(itemId))
-            {
-                DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
-                _logger.LogInformation("Removed item {ItemId} from denylist for user {UserId}", itemId, userId);
-            }
-            else
-            {
-                _logger.LogDebug("Item {ItemId} was not in denylist for user {UserId}", itemId, userId);
-            }
+            DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
+            _logger.LogInformation("Removed item {ItemId} from denylist for user {UserId}", itemId, userId);
+        }
+        else
+        {
+            _logger.LogDebug("Item {ItemId} was not in denylist for user {UserId}", itemId, userId);
         }
     }
 
@@ -85,21 +85,17 @@ public class DenylistManager
     /// </summary>
     /// <param name="userId">The user ID.</param>
     /// <returns>A list of item IDs in the user's denylist.</returns>
-    public IReadOnlyList<Guid> GetUserDenylist(Guid userId)
+    public IReadOnlyList<string> GetUserDenylist(Guid userId)
     {
         var config = DiscontinueWatchingPlugin.Instance?.Configuration;
         if (config == null)
         {
             _logger.LogError("Plugin configuration is not available");
-            return Array.Empty<Guid>();
+            return Array.Empty<string>();
         }
 
-        if (config.UserDenylists.TryGetValue(userId, out var denylist))
-        {
-            return denylist.ToList();
-        }
-
-        return Array.Empty<Guid>();
+        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
+        return entry?.ItemIds.AsReadOnly() ?? (IReadOnlyList<string>)Array.Empty<string>();
     }
 
     /// <summary>
@@ -108,7 +104,7 @@ public class DenylistManager
     /// <param name="userId">The user ID.</param>
     /// <param name="itemId">The item ID to check.</param>
     /// <returns>True if the item is in the denylist; otherwise, false.</returns>
-    public bool IsItemInUserDenylist(Guid userId, Guid itemId)
+    public bool IsItemInUserDenylist(Guid userId, string itemId)
     {
         var config = DiscontinueWatchingPlugin.Instance?.Configuration;
         if (config == null)
@@ -116,6 +112,7 @@ public class DenylistManager
             return false;
         }
 
-        return config.UserDenylists.TryGetValue(userId, out var denylist) && denylist.Contains(itemId);
+        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
+        return entry?.ItemIds.Contains(itemId) ?? false;
     }
 }

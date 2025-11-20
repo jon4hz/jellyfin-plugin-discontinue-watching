@@ -1,6 +1,23 @@
+using System.Collections.ObjectModel;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.DiscontinueWatching.Configuration;
+
+/// <summary>
+/// Represents a user's denylist entry for XML serialization.
+/// </summary>
+public class UserDenylistEntry
+{
+    /// <summary>
+    /// Gets or sets the user ID.
+    /// </summary>
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of denylisted item IDs.
+    /// </summary>
+    public Collection<string> ItemIds { get; } = new Collection<string>();
+}
 
 /// <summary>
 /// Plugin configuration.
@@ -12,11 +29,12 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
-        UserDenylists = new Dictionary<Guid, HashSet<Guid>>();
+        UserDenylistEntries = new Collection<UserDenylistEntry>();
     }
 
     /// <summary>
-    /// Gets the user-specific denylists. Key is UserId, Value is set of ItemIds.
+    /// Gets or sets the user-specific denylist entries.
     /// </summary>
-    public Dictionary<Guid, HashSet<Guid>> UserDenylists { get; }
+    public Collection<UserDenylistEntry> UserDenylistEntries { get; }
+
 }

@@ -46,7 +46,11 @@ public class PlaybackStartConsumer : IEventConsumer<PlaybackStartEventArgs>
             }
 
             var userId = eventArgs.Session.UserId;
-            var itemId = eventArgs.Item.Id;
+
+            // the gid looks like this: c7693687-4572-b346-5467-989d3cf84d39, so we remove the dashes
+            var itemId = eventArgs.Item.Id.ToString();
+            itemId = itemId.Replace("-", string.Empty, StringComparison.Ordinal);
+
 
             // Check if this item is in the user's denylist
             if (_denylistManager.IsItemInUserDenylist(userId, itemId))
@@ -58,6 +62,13 @@ public class PlaybackStartConsumer : IEventConsumer<PlaybackStartEventArgs>
 
                 // Remove the item from the denylist since user is watching it again
                 _denylistManager.RemoveFromUserDenylist(userId, itemId);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "User {UserId} started playback of item {ItemId} which is not in denylist.",
+                    userId,
+                    itemId);
             }
         }
         catch (Exception ex)
