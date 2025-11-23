@@ -30,6 +30,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public PluginConfiguration()
     {
         UserDenylistEntries = new Collection<UserDenylistEntry>();
+        DaysThreshold = 180;
     }
 
     /// <summary>
@@ -40,5 +41,5 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets the number of days after which items should be removed from Continue Watching.
     /// </summary>
-    public int DaysThreshold { get; set; } = 180;
+    public int DaysThreshold { get; set; }
 }
