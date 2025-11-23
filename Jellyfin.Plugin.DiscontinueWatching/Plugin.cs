@@ -1,7 +1,5 @@
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.Loader;
-using System.Text.RegularExpressions;
 using Jellyfin.Plugin.DiscontinueWatching.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;

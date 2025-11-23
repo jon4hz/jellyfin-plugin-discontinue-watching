@@ -1,14 +1,9 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using Jellyfin.Data.Enums;
 using MediaBrowser.Model.Plugins;
-using MediaBrowser.Model.Querying;
-using NJsonSchema.Annotations;
 
 namespace Jellyfin.Plugin.DiscontinueWatching.Configuration;
 
