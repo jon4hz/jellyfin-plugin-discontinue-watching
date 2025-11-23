@@ -16,7 +16,9 @@ public class UserDenylistEntry
     /// <summary>
     /// Gets or sets the list of denylisted item IDs.
     /// </summary>
-    public Collection<string> ItemIds { get; } = new Collection<string>();
+#pragma warning disable CA2227
+    public Collection<string> ItemIds { get; set; } = new Collection<string>();
+#pragma warning restore CA2227
 }
 
 /// <summary>
@@ -36,7 +38,9 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets the user-specific denylist entries.
     /// </summary>
-    public Collection<UserDenylistEntry> UserDenylistEntries { get; }
+#pragma warning disable CA2227
+    public Collection<UserDenylistEntry> UserDenylistEntries { get; set; }
+#pragma warning restore CA2227
 
     /// <summary>
     /// Gets or sets the number of days after which items should be removed from Continue Watching.

@@ -163,12 +163,51 @@ public class DiscontinueWatchingPlugin : BasePlugin<PluginConfiguration>, IHasWe
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        var prefix = GetType().Namespace;
+
         return
         [
+            // Settings page
             new PluginPageInfo
             {
-                Name = Name,
-                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
+                Name = "Settings",
+                EmbeddedResourcePath = $"{prefix}.Pages.Settings.index.html"
+            },
+            new PluginPageInfo
+            {
+                Name = "Settings.js",
+                EmbeddedResourcePath = $"{prefix}.Pages.Settings.index.js"
+            },
+
+            // UserLists page
+            new PluginPageInfo
+            {
+                Name = "UserLists",
+                EmbeddedResourcePath = $"{prefix}.Pages.UserLists.index.html"
+            },
+            new PluginPageInfo
+            {
+                Name = "UserLists.js",
+                EmbeddedResourcePath = $"{prefix}.Pages.UserLists.index.js"
+            },
+
+            // Info page
+            new PluginPageInfo
+            {
+                Name = "Info",
+                EmbeddedResourcePath = $"{prefix}.Pages.Info.index.html"
+            },
+            new PluginPageInfo
+            {
+                Name = "Info.js",
+                EmbeddedResourcePath = $"{prefix}.Pages.Info.index.js"
+            },
+
+            // Shared utilities
+            new PluginPageInfo
+            {
+                Name = "shared.js",
+                EmbeddedResourcePath = $"{prefix}.Pages.shared.js"
             }
         ];
     }

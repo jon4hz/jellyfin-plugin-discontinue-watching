@@ -35,13 +35,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Configuration\configPage.html" />
-    <EmbeddedResource Include="Configuration\configPage.html" />
+    <None Remove="Web\discontinue-watching.js" />
+    <EmbeddedResource Include="Web\discontinue-watching.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Web\discontinue-watching.js" />
-    <EmbeddedResource Include="Web\discontinue-watching.js" />
+      <None Remove="Pages\**\*" />
+      <EmbeddedResource Include="Pages\**\*" />
   </ItemGroup>
 
   <!-- Create plugin package -->

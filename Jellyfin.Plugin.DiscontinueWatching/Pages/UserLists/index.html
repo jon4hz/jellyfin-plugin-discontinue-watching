@@ -1,0 +1,40 @@
+<div
+  data-role="page"
+  class="page type-interior pluginConfigurationPage withTabs"
+  data-require="emby-button"
+  data-controller="__plugin/UserLists.js"
+>
+  <div class="content-primary" style="max-width: 53em">
+    <div class="verticalSection">
+      <div class="sectionTitleContainer">
+        <h2 class="sectionTitle">Discontinue Watching</h2>
+      </div>
+    </div>
+
+    <div class="verticalSection verticalSection-extrabottompadding">
+      <h3 class="sectionTitle">User Denylists</h3>
+      <p class="fieldDescription" style="margin-bottom: 1em">
+        Manage user-specific denylists. These items are hidden from the Continue Watching section until playback
+        resumes.
+      </p>
+      <div id="userDenylistsContainer">
+        <p>Loading user denylists...</p>
+      </div>
+    </div>
+  </div>
+
+  <template id="user-denylist-template">
+    <details
+      class="verticalSection"
+      style="background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; margin-bottom: 1em"
+    >
+      <summary style="cursor: pointer; list-style: none; display: flex; align-items: center; padding: 0.75em 1em">
+        <i class="material-icons arrow-icon" style="transition: transform 0.2s ease-in-out">arrow_right</i>
+        <h3 class="sectionTitle user-name-header" style="margin: 0 0 0 0.5em"></h3>
+      </summary>
+      <div class="user-denylist-container" style="padding: 1.5em; border-top: 1px solid rgba(255, 255, 255, 0.1)">
+        <div class="user-items-list"></div>
+      </div>
+    </details>
+  </template>
+</div>

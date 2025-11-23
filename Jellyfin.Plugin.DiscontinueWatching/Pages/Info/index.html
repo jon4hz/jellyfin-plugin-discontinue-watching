@@ -1,0 +1,108 @@
+<div data-role="page" class="page type-interior pluginConfigurationPage withTabs" data-controller="__plugin/Info.js">
+  <div class="content-primary" style="max-width: 53em">
+    <div class="verticalSection">
+      <div class="sectionTitleContainer">
+        <h2 class="sectionTitle">Discontinue Watching</h2>
+      </div>
+    </div>
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">About</h3>
+      <p class="fieldDescription">
+        This plugin allows users to hide items from their "Continue Watching" list. Hidden items will automatically
+        reappear when playback is resumed.
+      </p>
+    </div>
+
+    <br />
+    <hr />
+    <br />
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">Features</h3>
+      <ul>
+        <li>Hide items from Continue Watching via API</li>
+        <li>User-specific denylist management</li>
+        <li>Automatic removal from denylist when playback resumes</li>
+        <li>Scheduled cleanup of old Continue Watching items</li>
+        <li>Scheduled cleanup of deleted items from denylists</li>
+      </ul>
+    </div>
+
+    <br />
+    <hr />
+    <br />
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">Scheduled Tasks</h3>
+      <p class="fieldDescription">Two scheduled tasks are available to help manage your Continue Watching list:</p>
+      <ul>
+        <li>
+          <strong>Clean Up Continue Watching:</strong> Automatically hides items from Continue Watching that haven't
+          been watched within the configured threshold (default: 3 AM daily)
+        </li>
+        <li>
+          <strong>Clean Up Denylist:</strong> Removes items from user denylists that no longer exist on the server
+          (default: 4 AM daily)
+        </li>
+      </ul>
+      <p class="fieldDescription">
+        You can manually trigger these tasks or change their schedules from the Jellyfin dashboard under Scheduled Tasks
+        → DiscontinueWatching.
+      </p>
+    </div>
+
+    <br />
+    <hr />
+    <br />
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">API Endpoints</h3>
+      <p class="fieldDescription">The following authenticated API endpoints are available:</p>
+      <ul>
+        <li><strong>GET</strong> /DiscontinueWatching - Get all denylisted items for the current user</li>
+        <li><strong>POST</strong> /DiscontinueWatching/{itemId} - Add item to user's denylist</li>
+        <li><strong>DELETE</strong> /DiscontinueWatching/{itemId} - Remove item from user's denylist</li>
+      </ul>
+    </div>
+
+    <br />
+    <hr />
+    <br />
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">Client Integration</h3>
+      <p class="fieldDescription">
+        This plugin includes client-side JavaScript that automatically adds a "Remove from Continue Watching" button to
+        items in the web interface. The button appears when hovering over continue watching items.
+      </p>
+      <p class="fieldDescription">
+        <strong>Note:</strong> The client-side integration requires the
+        <a href="https://github.com/n00bcodr/Jellyfin-JavaScript-Injector" target="_blank">
+          JavaScript Injector plugin
+        </a>
+        to be installed and enabled.
+      </p>
+    </div>
+
+    <br />
+    <hr />
+    <br />
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">Resources</h3>
+      <ul>
+        <li>
+          <a href="https://github.com/jon4hz/jellyfin-plugin-discontinue-watching" target="_blank">
+            GitHub Repository
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/jon4hz/jellyfin-plugin-discontinue-watching/issues" target="_blank">
+            Report Issues
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
