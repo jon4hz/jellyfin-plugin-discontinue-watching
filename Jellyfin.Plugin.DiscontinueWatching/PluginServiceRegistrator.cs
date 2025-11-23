@@ -22,5 +22,6 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddScoped<IEventConsumer<PlaybackStartEventArgs>, PlaybackStartConsumer>();
         serviceCollection.AddHostedService<PluginEntryPoint>();
         serviceCollection.AddTransient<IScheduledTask, CleanupContinueWatchingTask>();
+        serviceCollection.AddTransient<IScheduledTask, CleanupDenylistTask>();
     }
 }
