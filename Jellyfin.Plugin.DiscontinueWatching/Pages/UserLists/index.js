@@ -20,9 +20,18 @@ const createUserDenylistEntry = (entry, users, shared) => {
       'display: flex; align-items: center; justify-content: space-between; padding: 0.5em; margin: 0.25em 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 4px;';
     itemDiv.setAttribute('data-item-id', itemId);
 
-    const itemSpan = document.createElement('span');
-    itemSpan.style.fontFamily = 'monospace';
-    itemSpan.textContent = itemId;
+    // Create a link to the item
+    const itemLink = document.createElement('a');
+    itemLink.href = `#!/details?id=${itemId}`;
+    itemLink.target = '_blank';
+    itemLink.style.cssText = 'font-family: monospace; color: inherit; text-decoration: none;';
+    itemLink.textContent = itemId;
+    itemLink.addEventListener('mouseenter', function() {
+      itemLink.style.textDecoration = 'underline';
+    });
+    itemLink.addEventListener('mouseleave', function() {
+      itemLink.style.textDecoration = 'none';
+    });
 
     const removeBtn = document.createElement('button');
     removeBtn.setAttribute('is', 'emby-button');
@@ -32,7 +41,7 @@ const createUserDenylistEntry = (entry, users, shared) => {
       removeItemFromUserDenylist(entry.UserId, itemId, itemDiv, detailsElement, shared);
     });
 
-    itemDiv.appendChild(itemSpan);
+    itemDiv.appendChild(itemLink);
     itemDiv.appendChild(removeBtn);
     itemsList.appendChild(itemDiv);
   });
