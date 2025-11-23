@@ -1,4 +1,4 @@
-const createUserDenylistEntry = (entry, users, shared) => {
+const createUserDenylistEntry = (userId, itemIds, users, shared) => {
   const template = document.querySelector('#user-denylist-template');
   const clone = template.content.cloneNode(true);
 
@@ -7,14 +7,14 @@ const createUserDenylistEntry = (entry, users, shared) => {
   const itemsList = clone.querySelector('.user-items-list');
   const arrowIcon = clone.querySelector('.arrow-icon');
 
-  const userName = users[entry.UserId] || entry.UserId;
-  nameHeader.textContent = userName + ' (' + entry.ItemIds.length + ' items)';
+  const userName = users[userId] || userId;
+  nameHeader.textContent = userName + ' (' + itemIds.length + ' items)';
 
   detailsElement.addEventListener('toggle', function () {
     arrowIcon.style.transform = detailsElement.open ? 'rotate(90deg)' : 'rotate(0deg)';
   });
 
-  entry.ItemIds.forEach(function (itemId) {
+  itemIds.forEach(function (itemId) {
     const itemDiv = document.createElement('div');
     itemDiv.style.cssText =
       'display: flex; align-items: center; justify-content: space-between; padding: 0.5em; margin: 0.25em 0; background-color: rgba(255, 255, 255, 0.03); border-radius: 4px;';
@@ -26,10 +26,10 @@ const createUserDenylistEntry = (entry, users, shared) => {
     itemLink.target = '_blank';
     itemLink.style.cssText = 'font-family: monospace; color: inherit; text-decoration: none;';
     itemLink.textContent = itemId;
-    itemLink.addEventListener('mouseenter', function() {
+    itemLink.addEventListener('mouseenter', function () {
       itemLink.style.textDecoration = 'underline';
     });
-    itemLink.addEventListener('mouseleave', function() {
+    itemLink.addEventListener('mouseleave', function () {
       itemLink.style.textDecoration = 'none';
     });
 
@@ -38,7 +38,7 @@ const createUserDenylistEntry = (entry, users, shared) => {
     removeBtn.className = 'raised button-cancel';
     removeBtn.innerHTML = '<span>Remove</span>';
     removeBtn.addEventListener('click', function () {
-      removeItemFromUserDenylist(entry.UserId, itemId, itemDiv, detailsElement, shared);
+      removeItemFromUserDenylist(userId, itemId, itemDiv, detailsElement, shared);
     });
 
     itemDiv.appendChild(itemLink);
@@ -58,22 +58,18 @@ const removeItemFromUserDenylist = (userId, itemId, itemDiv, detailsElement, sha
 
   const config = shared.getConfig();
 
-  const entry = config.UserDenylistEntries.find(function (e) {
-    return e.UserId === userId;
-  });
-
-  if (entry) {
-    const index = entry.ItemIds.indexOf(itemId);
+  // UserDenylistEntries is now a dictionary with userId as key
+  if (config.UserDenylistEntries && config.UserDenylistEntries[userId]) {
+    const itemList = config.UserDenylistEntries[userId];
+    const index = itemList.indexOf(itemId);
     if (index > -1) {
-      entry.ItemIds.splice(index, 1);
+      itemList.splice(index, 1);
     }
 
-    const shouldRemoveEntry = entry.ItemIds.length === 0;
+    // Remove the user entry if the list is empty
+    const shouldRemoveEntry = itemList.length === 0;
     if (shouldRemoveEntry) {
-      const entryIndex = config.UserDenylistEntries.indexOf(entry);
-      if (entryIndex > -1) {
-        config.UserDenylistEntries.splice(entryIndex, 1);
-      }
+      delete config.UserDenylistEntries[userId];
     }
 
     shared
@@ -97,7 +93,7 @@ const removeItemFromUserDenylist = (userId, itemId, itemDiv, detailsElement, sha
           // Update the item count in the header
           const nameHeader = detailsElement.querySelector('.user-name-header');
           const userName = nameHeader.textContent.split(' (')[0];
-          nameHeader.textContent = userName + ' (' + entry.ItemIds.length + ' items)';
+          nameHeader.textContent = userName + ' (' + itemList.length + ' items)';
         }
       })
       .catch(error => {
@@ -123,19 +119,25 @@ const loadUserDenylists = shared => {
       const config = results[0];
       const users = results[1];
 
-      if (!config.UserDenylistEntries || config.UserDenylistEntries.length === 0) {
+      // UserDenylistEntries is now a dictionary
+      const userDenylistEntries = config.UserDenylistEntries;
+
+      if (!userDenylistEntries || Object.keys(userDenylistEntries).length === 0) {
         container.innerHTML = '<p>No denylisted items found.</p>';
         return;
       }
 
       container.innerHTML = '';
 
-      config.UserDenylistEntries.forEach(function (entry) {
-        if (!entry.ItemIds || entry.ItemIds.length === 0) {
+      // Iterate over the dictionary
+      Object.keys(userDenylistEntries).forEach(function (userId) {
+        const itemIds = userDenylistEntries[userId];
+
+        if (!itemIds || itemIds.length === 0) {
           return;
         }
 
-        container.appendChild(createUserDenylistEntry(entry, users, shared));
+        container.appendChild(createUserDenylistEntry(userId, itemIds, users, shared));
       });
     })
     .catch(function (error) {

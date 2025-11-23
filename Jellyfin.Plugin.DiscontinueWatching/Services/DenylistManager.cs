@@ -8,18 +8,9 @@ namespace Jellyfin.Plugin.DiscontinueWatching.Services;
 /// <summary>
 /// Manages the user-specific denylist for items to hide from Continue Watching.
 /// </summary>
-public class DenylistManager
+public class DenylistManager(ILogger<DenylistManager> logger)
 {
-    private readonly ILogger<DenylistManager> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DenylistManager"/> class.
-    /// </summary>
-    /// <param name="logger">The logger.</param>
-    public DenylistManager(ILogger<DenylistManager> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<DenylistManager> _logger = logger;
 
     /// <summary>
     /// Adds an item to the user's denylist.
@@ -35,22 +26,20 @@ public class DenylistManager
             return;
         }
 
-        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
-        if (entry == null)
-        {
-            entry = new Configuration.UserDenylistEntry { UserId = userId };
-            config.UserDenylistEntries.Add(entry);
-        }
+        var itemList = config.UserDenylists.GetOrAdd(userId, _ => new System.Collections.ObjectModel.Collection<string>());
 
-        if (!entry.ItemIds.Contains(itemId))
+        lock (itemList)
         {
-            entry.ItemIds.Add(itemId);
-            DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
-            _logger.LogInformation("Added item {ItemId} to denylist for user {UserId}", itemId, userId);
-        }
-        else
-        {
-            _logger.LogDebug("Item {ItemId} already exists in denylist for user {UserId}", itemId, userId);
+            if (!itemList.Contains(itemId))
+            {
+                itemList.Add(itemId);
+                DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
+                _logger.LogInformation("Added item {ItemId} to denylist for user {UserId}", itemId, userId);
+            }
+            else
+            {
+                _logger.LogDebug("Item {ItemId} already exists in denylist for user {UserId}", itemId, userId);
+            }
         }
     }
 
@@ -68,15 +57,30 @@ public class DenylistManager
             return;
         }
 
-        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
-        if (entry != null && entry.ItemIds.Remove(itemId))
+        if (config.UserDenylists.TryGetValue(userId, out var itemList))
         {
-            DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
-            _logger.LogInformation("Removed item {ItemId} from denylist for user {UserId}", itemId, userId);
+            lock (itemList)
+            {
+                if (itemList.Remove(itemId))
+                {
+                    // Remove the user entry if the list is empty
+                    if (itemList.Count == 0)
+                    {
+                        config.UserDenylists.TryRemove(userId, out _);
+                    }
+
+                    DiscontinueWatchingPlugin.Instance?.SaveConfiguration();
+                    _logger.LogInformation("Removed item {ItemId} from denylist for user {UserId}", itemId, userId);
+                }
+                else
+                {
+                    _logger.LogDebug("Item {ItemId} was not in denylist for user {UserId}", itemId, userId);
+                }
+            }
         }
         else
         {
-            _logger.LogDebug("Item {ItemId} was not in denylist for user {UserId}", itemId, userId);
+            _logger.LogDebug("User {UserId} has no denylist entries", userId);
         }
     }
 
@@ -94,8 +98,15 @@ public class DenylistManager
             return Array.Empty<string>();
         }
 
-        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
-        return entry?.ItemIds.AsReadOnly() ?? (IReadOnlyList<string>)Array.Empty<string>();
+        if (config.UserDenylists.TryGetValue(userId, out var itemList))
+        {
+            lock (itemList)
+            {
+                return itemList.ToArray();
+            }
+        }
+
+        return Array.Empty<string>();
     }
 
     /// <summary>
@@ -112,7 +123,14 @@ public class DenylistManager
             return false;
         }
 
-        var entry = config.UserDenylistEntries.FirstOrDefault(e => e.UserId == userId);
-        return entry?.ItemIds.Contains(itemId) ?? false;
+        if (config.UserDenylists.TryGetValue(userId, out var itemList))
+        {
+            lock (itemList)
+            {
+                return itemList.Contains(itemId);
+            }
+        }
+
+        return false;
     }
 }

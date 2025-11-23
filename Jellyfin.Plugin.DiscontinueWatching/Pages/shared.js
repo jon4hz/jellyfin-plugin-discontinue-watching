@@ -87,7 +87,10 @@ export const loadUsers = () => {
   return ApiClient.getUsers().then(function (loadedUsers) {
     users = {};
     loadedUsers.forEach(function (user) {
-      users[user.Id] = user.Name;
+      console.log(`[DiscontinueWatching] Loaded user: ${user.Name} (${user.Id})`);
+      // add dashes back to guid
+      const guidWithDashes = user.Id.replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
+      users[guidWithDashes] = user.Name;
     });
     return users;
   });

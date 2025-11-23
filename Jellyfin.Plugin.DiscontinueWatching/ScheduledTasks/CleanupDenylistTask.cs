@@ -54,8 +54,8 @@ public class CleanupDenylistTask : IScheduledTask
             return Task.CompletedTask;
         }
 
-        var userDenylistEntries = config.UserDenylistEntries.ToList();
-        var totalEntries = userDenylistEntries.Count;
+        var userDenylists = config.UserDenylists.ToList();
+        var totalEntries = userDenylists.Count;
 
         if (totalEntries == 0)
         {
@@ -66,7 +66,7 @@ public class CleanupDenylistTask : IScheduledTask
         var processedEntries = 0;
         var totalItemsRemoved = 0;
 
-        foreach (var entry in userDenylistEntries)
+        foreach (var kvp in userDenylists)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -74,59 +74,66 @@ public class CleanupDenylistTask : IScheduledTask
                 return Task.CompletedTask;
             }
 
+            var userId = kvp.Key;
+            var itemList = kvp.Value;
+
             try
             {
-                _logger.LogDebug("Processing denylist for user {UserId}", entry.UserId);
+                _logger.LogDebug("Processing denylist for user {UserId}", userId);
 
                 var itemsToRemove = new List<string>();
 
-                // Check each item in the user's denylist
-                foreach (var itemId in entry.ItemIds)
+                // Lock the collection while we iterate
+                lock (itemList)
                 {
-                    if (cancellationToken.IsCancellationRequested)
+                    // Check each item in the user's denylist
+                    foreach (var itemId in itemList)
                     {
-                        break;
-                    }
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
 
-                    // Convert itemId back to GUID format (add dashes)
-                    // ItemIds are stored without dashes, but GetItemById expects GUID format
-                    if (!Guid.TryParse(itemId, out var itemGuid))
-                    {
-                        _logger.LogWarning("Invalid item ID format in denylist: {ItemId}", itemId);
-                        itemsToRemove.Add(itemId);
-                        continue;
-                    }
+                        // Convert itemId back to GUID format (add dashes)
+                        // ItemIds are stored without dashes, but GetItemById expects GUID format
+                        if (!Guid.TryParse(itemId, out var itemGuid))
+                        {
+                            _logger.LogWarning("Invalid item ID format in denylist: {ItemId}", itemId);
+                            itemsToRemove.Add(itemId);
+                            continue;
+                        }
 
-                    // Check if item exists in library
-                    var item = _libraryManager.GetItemById(itemGuid);
-                    if (item == null)
-                    {
-                        _logger.LogDebug("Item {ItemId} no longer exists, marking for removal from denylist", itemId);
-                        itemsToRemove.Add(itemId);
-                    }
-                    else
-                    {
-                        _logger.LogDebug("Item {ItemId} exists, no action needed", itemId);
+                        // Check if item exists in library
+                        var item = _libraryManager.GetItemById(itemGuid);
+                        if (item == null)
+                        {
+                            _logger.LogDebug("Item {ItemId} no longer exists, marking for removal from denylist", itemId);
+                            itemsToRemove.Add(itemId);
+                        }
+                        else
+                        {
+                            _logger.LogDebug("Item {ItemId} exists, no action needed", itemId);
+                        }
                     }
                 }
 
                 // Remove non-existent items from the denylist
                 foreach (var itemId in itemsToRemove)
                 {
-                    _denylistManager.RemoveFromUserDenylist(entry.UserId, itemId);
+                    _denylistManager.RemoveFromUserDenylist(userId, itemId);
                     totalItemsRemoved++;
-                    _logger.LogInformation("Removed non-existent item {ItemId} from denylist for user {UserId}", itemId, entry.UserId);
+                    _logger.LogInformation("Removed non-existent item {ItemId} from denylist for user {UserId}", itemId, userId);
                 }
 
                 processedEntries++;
                 var progressPercent = (double)processedEntries / totalEntries * 100;
                 progress.Report(progressPercent);
 
-                _logger.LogDebug("Processed denylist for user {UserId}, removed {Count} items", entry.UserId, itemsToRemove.Count);
+                _logger.LogDebug("Processed denylist for user {UserId}, removed {Count} items", userId, itemsToRemove.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing denylist for user {UserId}", entry.UserId);
+                _logger.LogError(ex, "Error processing denylist for user {UserId}", userId);
             }
         }
 
