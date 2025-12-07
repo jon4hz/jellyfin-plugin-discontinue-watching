@@ -39,6 +39,44 @@ This plugin requires the following plugins to be installed:
 6. Restart your Jellyfin server
 7. Enable the plugin in **Plugins** → **My Plugins**
 
+## ⚙️ Custom Routes
+
+This plugin has a custom route that simulate the "Resume" endpoints but filters out unwanted items.
+Configure your reverse proxy accordingly to make every client support this plugin.
+
+### Treafik Example
+
+```yaml
+---
+http:
+  middlewares:
+    discontinue-watching:
+      replacePathRegex:
+        regex: '^/UserItems/Resume'
+        replacement: '/DiscontinueWatching/Override/UserItems/Resume'
+---
+http:
+  middlewares:
+    discontinue-watching-old:
+      replacePathRegex:
+        regex: '^/Users/([^/]+)/Items/Resume'
+        replacement: '/DiscontinueWatching/Override/Users/$1/Items/Resume'
+```
+
+### Nginx Example
+
+```nginx
+location ~ ^/UserItems/Resume {
+    rewrite ^/UserItems/Resume /DiscontinueWatching/Override/UserItems/Resume break;
+    proxy_pass http://jellyfin_backend;
+}
+
+location ~ ^/Users/([^/]+)/Items/Resume {
+    rewrite ^/Users/([^/]+)/Items/Resume /DiscontinueWatching/Override/Users/$1/Items/Resume break;
+    proxy_pass http://jellyfin_backend;
+}
+```
+
 ## 🔌 Integrate this plugin!
 
 This plugin can be easily integrated in other 3rd party clients.
@@ -46,15 +84,19 @@ This plugin can be easily integrated in other 3rd party clients.
 ### API Routes
 
 ```
+
 GET /DiscontinueWatching
 
 # returns an array of item ID which should be hidden from Continue Watching for the current user
+
 ```
 
 ```
+
 POST /DiscontinueWatching/{itemId}
 
 # adds the specified item ID to the denylist for the current user
+
 ```
 
 With these routes, other clients can remove items from Continue Watching by calling the POST route.
@@ -65,7 +107,9 @@ The items returned by the GET route should be hidden from Continue Watching list
 ### Building
 
 ```
+
 make build
+
 ```
 
 ### Contributing
@@ -74,7 +118,9 @@ All kind of contributions are welcome! Feel free to open issues or submit pull r
 If you want to contribute code, please make sure to install the pre-commit hooks:
 
 ```
+
 pre-commit install
+
 ```
 
 ## 🥂 Credis
