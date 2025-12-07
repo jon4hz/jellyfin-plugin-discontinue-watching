@@ -6,12 +6,16 @@ export default function (view, params) {
       // Load configuration
       shared.loadConfiguration().then(config => {
         document.getElementById('daysThreshold').value = config.DaysThreshold || 180;
+        document.getElementById('enableFrontendFiltering').checked =
+          config.EnableFrontendFiltering !== undefined ? config.EnableFrontendFiltering : true;
       });
 
       // Set up config update listener
       shared.setOnConfigUpdatedListener('settings', config => {
         console.log('[DiscontinueWatching] Updating settings DOM');
         document.getElementById('daysThreshold').value = config.DaysThreshold || 180;
+        document.getElementById('enableFrontendFiltering').checked =
+          config.EnableFrontendFiltering !== undefined ? config.EnableFrontendFiltering : true;
       });
 
       // Handle form submission
@@ -20,6 +24,7 @@ export default function (view, params) {
 
         const config = shared.getConfig();
         config.DaysThreshold = parseInt(document.getElementById('daysThreshold').value, 10);
+        config.EnableFrontendFiltering = document.getElementById('enableFrontendFiltering').checked;
 
         shared.saveConfiguration(config);
 

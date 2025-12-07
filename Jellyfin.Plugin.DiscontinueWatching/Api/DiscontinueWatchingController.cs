@@ -138,6 +138,22 @@ public class DiscontinueWatchingController : ControllerBase
     }
 
     /// <summary>
+    /// Gets the plugin configuration for frontend use.
+    /// </summary>
+    /// <returns>Configuration object with frontend-relevant settings.</returns>
+    /// <response code="200">Configuration returned.</response>
+    [HttpGet("Config")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<object> GetConfig()
+    {
+        var config = DiscontinueWatchingPlugin.Instance?.Configuration;
+        return Ok(new
+        {
+            EnableFrontendFiltering = config?.EnableFrontendFiltering ?? true
+        });
+    }
+
+    /// <summary>
     /// Overrides for the "Users/{userId}/Items/Resume" endpoint
     /// </summary>
     /// <param name="userId">The user id.</param>

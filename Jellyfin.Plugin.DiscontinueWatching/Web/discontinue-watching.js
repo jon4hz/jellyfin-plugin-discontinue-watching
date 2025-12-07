@@ -55,6 +55,11 @@
   // Store the denylist in memory
   let denylist = new Set();
 
+  // Store the plugin configuration
+  let pluginConfig = {
+    enableFrontendFiltering: true,
+  };
+
   /**
    * Make API calls to the plugin backend
    */
@@ -70,6 +75,23 @@
     const baseUrl = window.ApiClient.serverAddress() || window.location.origin;
 
     switch (action) {
+      case 'getConfig':
+        return fetch(`${baseUrl}/DiscontinueWatching/Config`, {
+          headers: {
+            Authorization: `MediaBrowser Token="${window.ApiClient.accessToken()}"`,
+          },
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .catch(error => {
+            console.error('[DiscontinueWatching] Error getting config:', error);
+            throw error;
+          });
+
       case 'getDenylist':
         return fetch(`${baseUrl}/DiscontinueWatching/Items`, {
           headers: {
@@ -113,6 +135,21 @@
   }
 
   /**
+   * Load the plugin configuration from the API
+   */
+  async function loadConfig() {
+    try {
+      console.log('[DiscontinueWatching] Loading plugin configuration');
+      const config = await callPluginAPI('getConfig');
+      pluginConfig.enableFrontendFiltering = config.EnableFrontendFiltering ?? true;
+      console.log('[DiscontinueWatching] Frontend filtering enabled:', pluginConfig.enableFrontendFiltering);
+    } catch (error) {
+      console.error('[DiscontinueWatching] Error loading config:', error);
+      pluginConfig.enableFrontendFiltering = true;
+    }
+  }
+
+  /**
    * Load the denylist from the API
    */
   async function loadDenylist() {
@@ -130,6 +167,10 @@
    * Filter out items from continue watching section
    */
   function filterContinueWatching() {
+    if (!pluginConfig.enableFrontendFiltering) {
+      return;
+    }
+
     const cards = document.querySelectorAll('.card[data-positionticks]');
 
     cards.forEach(card => {
@@ -314,7 +355,11 @@
       // Wait for ApiClient to be available
       await waitForApiClient();
 
-      await loadDenylist();
+      await loadConfig();
+
+      if (pluginConfig.enableFrontendFiltering) {
+        await loadDenylist();
+      }
 
       // Setup observer and update UI
       setupObserver();

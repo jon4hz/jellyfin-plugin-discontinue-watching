@@ -22,6 +22,7 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         _userDenylists = new ConcurrentDictionary<Guid, Collection<string>>();
         DaysThreshold = 180;
+        EnableFrontendFiltering = true;
     }
 
     /// <summary>
@@ -70,6 +71,12 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the number of days after which items should be removed from Continue Watching.
     /// </summary>
     public int DaysThreshold { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether frontend-based item filtering is enabled.
+    /// Set this to false if you have configured custom API routes on your reverse proxy.
+    /// </summary>
+    public bool EnableFrontendFiltering { get; set; }
 }
 
 /// <summary>

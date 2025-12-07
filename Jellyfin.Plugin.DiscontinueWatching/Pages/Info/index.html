@@ -60,10 +60,37 @@
       <h3 class="sectionTitle">API Endpoints</h3>
       <p class="fieldDescription">The following authenticated API endpoints are available:</p>
       <ul>
-        <li><strong>GET</strong> /DiscontinueWatching - Get all denylisted items for the current user</li>
-        <li><strong>POST</strong> /DiscontinueWatching/{itemId} - Add item to user's denylist</li>
-        <li><strong>DELETE</strong> /DiscontinueWatching/{itemId} - Remove item from user's denylist</li>
+        <li><strong>GET</strong> /DiscontinueWatching/Items - Get all denylisted items for the current user</li>
+        <li><strong>POST</strong> /DiscontinueWatching/Items/{itemId} - Add item to user's denylist</li>
+        <li><strong>DELETE</strong> /DiscontinueWatching/Items/{itemId} - Remove item from user's denylist</li>
+        <li><strong>GET</strong> /DiscontinueWatching/Config - Get plugin configuration</li>
       </ul>
+    </div>
+
+    <br />
+    <hr />
+    <br />
+
+    <div class="verticalSection">
+      <h3 class="sectionTitle">Custom API Routes</h3>
+      <p class="fieldDescription">
+        For compatibility with third-party clients, you can configure your reverse proxy to override the standard Resume
+        endpoints with the plugin's filtering endpoints:
+      </p>
+      <ul>
+        <li>
+          <strong>GET</strong> /DiscontinueWatching/Override/UserItems/Resume - Override for the UserItems/Resume
+          endpoint
+        </li>
+        <li>
+          <strong>GET</strong> /DiscontinueWatching/Override/Users/{userId}/Items/Resume - Override for the legacy
+          Users/{userId}/Items/Resume endpoint
+        </li>
+      </ul>
+      <p class="fieldDescription">
+        When using these custom routes on your reverse proxy, you can disable frontend filtering in the Settings page to
+        avoid redundant filtering operations.
+      </p>
     </div>
 
     <br />
