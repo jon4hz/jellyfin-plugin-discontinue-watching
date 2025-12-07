@@ -71,7 +71,7 @@
 
     switch (action) {
       case 'getDenylist':
-        return fetch(`${baseUrl}/DiscontinueWatching`, {
+        return fetch(`${baseUrl}/DiscontinueWatching/Items`, {
           headers: {
             Authorization: `MediaBrowser Token="${window.ApiClient.accessToken()}"`,
           },
@@ -88,7 +88,7 @@
           });
 
       case 'addToDenylist':
-        return fetch(`${baseUrl}/DiscontinueWatching/${data.itemId}`, {
+        return fetch(`${baseUrl}/DiscontinueWatching/Items/${data.itemId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
