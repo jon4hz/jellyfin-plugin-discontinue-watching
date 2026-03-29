@@ -123,7 +123,7 @@ pre-commit install
 
 ```
 
-## 🥂 Credis
+## 🥂 Credits
 
 - [KefinTweaks](https://github.com/ranaldsgift/KefinTweaks) - for giving me the idea to write a dedicated plugin for this feature. (and also for helping with some javascript struggles)
 - [jellyfin-plugin-streamyfin](https://github.com/streamyfin/jellyfin-plugin-streamyfin) - from whom I've borrowed some code snippets for the configuration page.
