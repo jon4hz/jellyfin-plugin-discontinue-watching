@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -69,9 +69,8 @@
     <Message Text="Plugin package contents:" Importance="high" />
     <Message Text="  - %(PluginFiles.Filename)%(PluginFiles.Extension)" Importance="high" />
 
-    <!-- Use cross-platform zip command or fallback -->
-    <Exec Command="which zip > /dev/null 2>&amp;1 &amp;&amp; cd &quot;$(PluginDir)&quot; &amp;&amp; zip -r &quot;$(PluginArchive)&quot; . || echo 'zip command not available, package created in $(PluginDir)'"
-          ContinueOnError="true" />
+    <!-- Use built-in cross-platform ZipDirectory task -->
+    <ZipDirectory SourceDirectory="$(PluginDir)" DestinationFile="$(PluginArchive)" Overwrite="true" />
 
     <Message Text="Plugin files prepared in: $(PluginDir)" Importance="high" />
     <Message Text="Plugin package: $(PluginArchive)" Importance="high" Condition="Exists('$(PluginArchive)')" />
