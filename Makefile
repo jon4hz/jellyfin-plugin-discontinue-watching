@@ -40,7 +40,7 @@ restore:
 
 test: build
 	@echo "Testing build output..."
-	@if [ ! -f "Jellyfin.Plugin.DiscontinueWatching/bin/Release/net9.0/Jellyfin.Plugin.DiscontinueWatching.dll" ]; then \
+	@if [ ! -f "Jellyfin.Plugin.DiscontinueWatching/bin/Release/net10.0/Jellyfin.Plugin.DiscontinueWatching.dll" ]; then \
 		echo "Build test failed - DLL not found"; \
 		exit 1; \
 	fi
@@ -73,10 +73,10 @@ install: package
 dev-install: debug
 	@echo "Installing debug build to local Jellyfin..."
 	sudo mkdir -p /var/lib/jellyfin/plugins/DiscontinueWatching
-	sudo cp Jellyfin.Plugin.DiscontinueWatching/bin/Debug/net9.0/Jellyfin.Plugin.DiscontinueWatching.dll /var/lib/jellyfin/plugins/DiscontinueWatching/
+	sudo cp Jellyfin.Plugin.DiscontinueWatching/bin/Debug/net10.0/Jellyfin.Plugin.DiscontinueWatching.dll /var/lib/jellyfin/plugins/DiscontinueWatching/
 	# Copy Humanizer dependency for debug builds
-	@if [ -f "Jellyfin.Plugin.DiscontinueWatching/bin/Debug/net9.0/Humanizer.dll" ]; then \
-		sudo cp Jellyfin.Plugin.DiscontinueWatching/bin/Debug/net9.0/Humanizer.dll /var/lib/jellyfin/plugins/DiscontinueWatching/; \
+	@if [ -f "Jellyfin.Plugin.DiscontinueWatching/bin/Debug/net10.0/Humanizer.dll" ]; then \
+		sudo cp Jellyfin.Plugin.DiscontinueWatching/bin/Debug/net10.0/Humanizer.dll /var/lib/jellyfin/plugins/DiscontinueWatching/; \
 	fi
 	@echo "Debug plugin installed. Restart Jellyfin to load the updated plugin."
 

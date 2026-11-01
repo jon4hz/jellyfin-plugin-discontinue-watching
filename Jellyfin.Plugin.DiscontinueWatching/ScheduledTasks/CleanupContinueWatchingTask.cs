@@ -70,7 +70,7 @@ public class CleanupContinueWatchingTask : IScheduledTask
 
         _logger.LogInformation("Cleaning up items not watched since {ThresholdDate} (threshold: {Days} days)", thresholdDate, daysThreshold);
 
-        var users = _userManager.Users.ToList();
+        var users = _userManager.GetUsers().ToList();
         var totalUsers = users.Count;
         var processedUsers = 0;
         var totalItemsHidden = 0;
